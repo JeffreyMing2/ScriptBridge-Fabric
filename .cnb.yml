@@ -1,0 +1,11 @@
+# CNB构建配置文件
+# 文档参考：https://docs.cnb.cool/zh/grammar/pipeline.html
+
+main:
+  push:
+    - stages:
+        - name: 编译
+          image: docker.io/library/eclipse-temurin:21-jdk
+          script:
+            - chmod +x gradlew
+            - ./gradlew build
