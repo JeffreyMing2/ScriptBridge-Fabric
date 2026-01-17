@@ -50,6 +50,9 @@ dependencies {
     include "org.graalvm.polyglot:polyglot:24.1.0"
 
     // JavaScript Language Implementation
+    implementation "org.graalvm.js:js:24.1.0"
+    include "org.graalvm.js:js:24.1.0"
+
     implementation "org.graalvm.js:js-language:24.1.0"
     include "org.graalvm.js:js-language:24.1.0"
     
@@ -67,8 +70,8 @@ dependencies {
     implementation "org.graalvm.truffle:truffle-api:24.1.0"
     include "org.graalvm.truffle:truffle-api:24.1.0"
     
-    implementation "org.graalvm.truffle:truffle-dsl-processor:24.1.0"
-    include "org.graalvm.truffle:truffle-dsl-processor:24.1.0"
+    // Annotation Processor (Compile-time only)
+    annotationProcessor "org.graalvm.truffle:truffle-dsl-processor:24.1.0"
     
     // Native Image support (contains ImageInfo)
     implementation "org.graalvm.sdk:nativeimage:24.1.0"
