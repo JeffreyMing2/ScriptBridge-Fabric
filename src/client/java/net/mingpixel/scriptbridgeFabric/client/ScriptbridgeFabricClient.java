@@ -1,5 +1,6 @@
 package net.mingpixel.scriptbridgeFabric.client;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -53,6 +54,29 @@ public class ScriptbridgeFabricClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("script")
+                .then(ClientCommandManager.literal("run")
+                    .then(ClientCommandManager.argument("filename", StringArgumentType.string())
+                        .suggests((context, builder) -> {
+                            if (scriptManager != null) {
+                                for (String script : scriptManager.getScriptList()) {
+                                    builder.suggest(script);
+                                }
+                            }
+                            return builder.buildFuture();
+                        })
+                        .executes(context -> {
+                            String filename = StringArgumentType.getString(context, "filename");
+                            if (scriptManager != null) {
+                                context.getSource().sendFeedback(Text.literal("正在执行客户端脚本: " + filename).formatted(Formatting.YELLOW));
+                                scriptManager.executeScript(filename);
+                                context.getSource().sendFeedback(Text.literal("客户端脚本执行完成。").formatted(Formatting.GREEN));
+                            } else {
+                                context.getSource().sendError(Text.literal("脚本管理器未初始化！"));
+                            }
+                            return 1;
+                        })
+                    )
+                )
                 .then(ClientCommandManager.literal("list")
                     .executes(context -> {
                         if (scriptManager != null) {
