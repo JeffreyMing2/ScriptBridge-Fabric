@@ -37,7 +37,7 @@ public class ScriptManager {
             // Explicitly use the class loader of the current class (Mod ClassLoader)
             // This is critical for Fabric/Knot environments to find GraalVM languages and resources
             this.context = Context.newBuilder("js")
-                    .allowAllAccess(true)
+                    .allowAllAccess(false) // Disable allowAllAccess as per user request (Security Risk)
                     .allowHostAccess(org.graalvm.polyglot.HostAccess.ALL)
                     .allowHostClassLookup(s -> {
                         // Security: Block access to dangerous classes
