@@ -2,3 +2,6 @@
 .gradle/
 .vscode/
 .DS_Store
+build/loom-cache/argFiles/runClient
+build/
+build/devlibs/
