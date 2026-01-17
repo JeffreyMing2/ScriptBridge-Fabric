@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.entity.Entity;
 
 public class ScriptbridgeFabric implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("ScriptBridge");
@@ -34,7 +36,7 @@ public class ScriptbridgeFabric implements ModInitializer {
         });
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            if (handler.player.getPermissionLevel() >= 2) {
+            if (handler.player.hasPermissionLevel(2)) {
                 handler.player.sendMessage(
                     Text.literal("[ScriptBridge] ").formatted(Formatting.GOLD)
                         .append(Text.literal("服务端模组加载成功！脚本系统已就绪。").formatted(Formatting.GREEN)),

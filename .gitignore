@@ -1,7 +1,30 @@
-.idea/
+# Gradle
 .gradle/
-.vscode/
-.DS_Store
-build/loom-cache/argFiles/runClient
 build/
-build/devlibs/
+out/
+bin/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Fabric / Minecraft
+run/
+!run/scripts/
+*.log
+*.log.gz
+crash-reports/
+debug/
