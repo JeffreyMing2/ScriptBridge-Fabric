@@ -10,16 +10,24 @@ import net.minecraft.util.math.BlockPos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ScriptApi {
+public class ScriptApi implements IScriptApi {
     private final MinecraftServer server;
     private static final Logger LOGGER = LoggerFactory.getLogger("ScriptBridge-API");
+    private boolean debugMode = false;
 
     public ScriptApi(MinecraftServer server) {
         this.server = server;
     }
 
+    public void setDebugMode(boolean debug) {
+        this.debugMode = debug;
+    }
+
     public void log(String message) {
         LOGGER.info("[JS] " + message);
+        if (debugMode && server != null) {
+            server.getPlayerManager().broadcast(Text.literal("§7[JS-Debug] " + message), false);
+        }
     }
 
     public void broadcast(String message) {

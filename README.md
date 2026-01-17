@@ -35,6 +35,14 @@ console.log("Hello from ScriptBridge!");
 ./gradlew build
 ```
 
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Community
+
+- **Official QQ Group**: 1080675954
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

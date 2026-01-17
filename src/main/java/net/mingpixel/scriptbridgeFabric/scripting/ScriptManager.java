@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ScriptManager {
@@ -15,6 +18,7 @@ public class ScriptManager {
     private Context context;
     private final Path scriptsDir;
     private final Object apiInstance;
+    private boolean debugMode = false;
 
     public ScriptManager(Path scriptsDir, Object apiInstance) {
         this.scriptsDir = scriptsDir;
@@ -84,6 +88,34 @@ public class ScriptManager {
     public void close() {
         if (context != null) {
             context.close();
+        }
+    }
+
+    public void setDebugMode(boolean debug) {
+        this.debugMode = debug;
+        if (apiInstance instanceof IScriptApi) {
+            ((IScriptApi) apiInstance).setDebugMode(debug);
+            LOGGER.info("Debug mode set to: {}", debug);
+        }
+    }
+
+    public boolean toggleDebugMode() {
+        setDebugMode(!this.debugMode);
+        return this.debugMode;
+    }
+
+    public List<String> getScriptList() {
+        if (!Files.exists(scriptsDir)) {
+            return Collections.emptyList();
+        }
+        try (Stream<Path> paths = Files.walk(scriptsDir)) {
+            return paths.filter(Files::isRegularFile)
+                        .filter(p -> p.toString().endsWith(".js"))
+                        .map(p -> scriptsDir.relativize(p).toString())
+                        .collect(Collectors.toList());
+        } catch (IOException e) {
+            LOGGER.error("Failed to list scripts", e);
+            return Collections.emptyList();
         }
     }
 }

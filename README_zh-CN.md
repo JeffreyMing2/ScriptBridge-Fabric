@@ -33,6 +33,14 @@ console.log("Hello from ScriptBridge!");
 ./gradlew build
 ```
 
+## 参与贡献
+
+我们欢迎各种形式的贡献！请查看 [贡献指南](CONTRIBUTING_zh-CN.md) 了解详情。
+
+## 社区与联系方式
+
+- **官方交流群 (QQ)**: 1080675954
+
 ## 许可证
 
 本项目采用 MIT 许可证 - 详情请参阅 [LICENSE](LICENSE) 文件。
