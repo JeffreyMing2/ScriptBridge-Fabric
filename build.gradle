@@ -82,6 +82,12 @@ dependencies {
 
     implementation "org.graalvm.sdk:jniutils:24.1.0"
     include "org.graalvm.sdk:jniutils:24.1.0"
+
+    implementation "org.graalvm.sdk:proxy:24.1.0"
+    include "org.graalvm.sdk:proxy:24.1.0"
+
+    implementation "org.graalvm.sdk:io:24.1.0"
+    include "org.graalvm.sdk:io:24.1.0"
     
     // ICU4J is required for internationalization in GraalJS
     implementation "com.ibm.icu:icu4j:74.2"
@@ -145,5 +151,17 @@ publishing {
         // Notice: This block does NOT have the same function as the block in the top level.
         // The repositories here will be used for publishing your artifact, not for
         // retrieving dependencies.
+
+        // CNB Artifact Registry (Optional)
+        if (System.getenv("CNB_ARTIFACT_URL")) {
+            maven {
+                name = "CNB"
+                url = uri(System.getenv("CNB_ARTIFACT_URL"))
+                credentials {
+                    username = System.getenv("CNB_ARTIFACT_USER") ?: "cnb"
+                    password = System.getenv("CNB_ARTIFACT_PASSWORD") ?: System.getenv("CNB_TOKEN")
+                }
+            }
+        }
     }
 }

@@ -27,6 +27,11 @@ public class ScriptManager {
     }
 
     private void initializeContext() {
+        // Save the original ClassLoader
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        // Set TCCL to the mod's ClassLoader so Graal can find the language services
+        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+
         try {
             // Initialize GraalVM context with access to Java
             // Explicitly use the class loader of the current class (Mod ClassLoader)
@@ -46,6 +51,9 @@ public class ScriptManager {
         } catch (Throwable e) {
             LOGGER.error("Failed to initialize scripting engine", e);
             throw new RuntimeException("GraalJS initialization failed", e); // Re-throw to make it visible
+        } finally {
+            // Restore the original ClassLoader
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
         }
     }
 

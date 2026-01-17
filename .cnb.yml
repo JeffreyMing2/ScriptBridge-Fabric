@@ -32,6 +32,23 @@ main:
             - echo "✅ 构建完成！检查产物..."
             - ls -lh build/libs/
 
-            # (可选) 如果后续需要发布，可以在此处添加发布命令
-            # 需先在平台设置环境变量
-            # - ./gradlew publish
+        # ------------------------------------------------------------------
+        # [可选] 发布到 CNB 制品库 (Maven Registry)
+        # 如果您希望在 CNB 的"制品库"中管理和下载构建好的 JAR 包，请取消下方注释并配置环境变量。
+        #
+        # 前置条件：
+        # 1. 在 CNB 项目中创建一个 Maven 制品库（例如名为 "maven-repo"）。
+        # 2. 获取制品库地址，例如：https://maven.cnb.cool/your-group/maven-repo
+        # 3. 在项目设置 -> 环境变量中添加：
+        #    - CNB_ARTIFACT_URL: 制品库地址
+        #    - (CNB_TOKEN 通常内置可用，无需手动设置，用户名为 cnb)
+        # ------------------------------------------------------------------
+        # - name: 发布到制品库
+        #   image: docker.io/library/eclipse-temurin:21-jdk
+        #   caches:
+        #     - ~/.gradle/caches
+        #     - ~/.gradle/wrapper
+        #     - .gradle/loom-cache
+        #   script:
+        #     - chmod +x gradlew
+        #     - ./gradlew publish --no-daemon
