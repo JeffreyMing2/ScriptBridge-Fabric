@@ -82,13 +82,11 @@ dependencies {
 
     implementation "org.graalvm.sdk:jniutils:24.1.0"
     include "org.graalvm.sdk:jniutils:24.1.0"
-
-    implementation "org.graalvm.sdk:proxy:24.1.0"
-    include "org.graalvm.sdk:proxy:24.1.0"
-
-    implementation "org.graalvm.sdk:io:24.1.0"
-    include "org.graalvm.sdk:io:24.1.0"
     
+    // Full GraalVM SDK (replaces individual modules like proxy, io which might be missing/named differently)
+    implementation "org.graalvm.sdk:graal-sdk:24.1.0"
+    include "org.graalvm.sdk:graal-sdk:24.1.0"
+
     // ICU4J is required for internationalization in GraalJS
     implementation "com.ibm.icu:icu4j:74.2"
     include "com.ibm.icu:icu4j:74.2"
