@@ -53,4 +53,17 @@ public class ClientScriptApi implements IScriptApi {
     public MinecraftClient getMinecraft() {
         return client;
     }
+
+    public void setClipboard(String text) {
+        if (client != null && client.keyboard != null) {
+            client.keyboard.setClipboard(text);
+        }
+    }
+
+    public String getClipboard() {
+        if (client != null && client.keyboard != null) {
+            return client.keyboard.getClipboard();
+        }
+        return "";
+    }
 }
