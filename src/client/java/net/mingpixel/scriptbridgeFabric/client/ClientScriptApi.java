@@ -45,4 +45,12 @@ public class ClientScriptApi implements IScriptApi {
         }
         return "Unknown";
     }
+
+    /**
+     * Exposes the raw MinecraftClient instance to scripts.
+     * This allows scripts to access client-side features without needing manual reflection/mappings lookup.
+     */
+    public MinecraftClient getMinecraft() {
+        return client;
+    }
 }

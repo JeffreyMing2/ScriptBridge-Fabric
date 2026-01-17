@@ -39,7 +39,17 @@ public class ScriptManager {
             this.context = Context.newBuilder("js")
                     .allowAllAccess(true)
                     .allowHostAccess(org.graalvm.polyglot.HostAccess.ALL)
-                    .allowHostClassLookup(s -> true)
+                    .allowHostClassLookup(s -> {
+                        // Security: Block access to dangerous classes
+                        if (s.startsWith("java.lang.Runtime") || 
+                            s.startsWith("java.lang.Process") || 
+                            s.startsWith("java.lang.System") ||
+                            s.startsWith("java.io.")) {
+                            LOGGER.warn("Script attempted to access blocked class: {}", s);
+                            return false;
+                        }
+                        return true;
+                    })
                     .option("engine.WarnInterpreterOnly", "false") // Suppress warning if running without GraalVM JDK
                     .hostClassLoader(this.getClass().getClassLoader()) // CRITICAL FIX: Set correct ClassLoader
                     .build();
