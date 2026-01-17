@@ -38,7 +38,7 @@ public class ScriptManager {
             context.getBindings("js").putMember("game", apiInstance);
             
             LOGGER.info("Scripting engine initialized for path: {}", scriptsDir);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOGGER.error("Failed to initialize scripting engine", e);
         }
     }

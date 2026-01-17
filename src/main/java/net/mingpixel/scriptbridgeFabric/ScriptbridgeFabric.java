@@ -26,8 +26,12 @@ public class ScriptbridgeFabric implements ModInitializer {
     public void onInitialize() {
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             LOGGER.info("Initializing ScriptBridge...");
-            scriptManager = new ScriptManager(server.getRunDirectory().resolve("scripts/server"), new net.mingpixel.scriptbridgeFabric.scripting.ScriptApi(server));
-            scriptManager.loadScripts();
+            try {
+                scriptManager = new ScriptManager(server.getRunDirectory().resolve("scripts/server"), new net.mingpixel.scriptbridgeFabric.scripting.ScriptApi(server));
+                scriptManager.loadScripts();
+            } catch (Throwable e) {
+                LOGGER.error("Failed to initialize ScriptBridge Server Manager", e);
+            }
         });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {

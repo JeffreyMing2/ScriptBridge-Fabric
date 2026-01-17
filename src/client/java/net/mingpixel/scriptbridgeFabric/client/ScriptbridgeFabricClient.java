@@ -24,8 +24,15 @@ public class ScriptbridgeFabricClient implements ClientModInitializer {
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             // Initialize and load scripts when joining a world
             if (scriptManager == null) {
-                scriptManager = new ScriptManager(runDir.toPath().resolve("scripts/client"), new ClientScriptApi(client));
-                scriptManager.loadScripts();
+                try {
+                    scriptManager = new ScriptManager(runDir.toPath().resolve("scripts/client"), new ClientScriptApi(client));
+                    scriptManager.loadScripts();
+                } catch (Throwable e) {
+                    // Log error but don't crash client
+                    // Use a logger or print stack trace
+                    e.printStackTrace();
+                    client.player.sendMessage(Text.literal("§c[ScriptBridge] 初始化失败，请检查日志").formatted(Formatting.RED), false);
+                }
             } else {
                 scriptManager.reload(); // Ensure fresh state if it wasn't null for some reason
             }

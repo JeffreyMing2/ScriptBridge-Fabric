@@ -67,6 +67,12 @@ dependencies {
     implementation "org.graalvm.sdk:nativeimage:24.1.0"
     include "org.graalvm.sdk:nativeimage:24.1.0"
     
+    implementation "org.graalvm.sdk:word:24.1.0"
+    include "org.graalvm.sdk:word:24.1.0"
+
+    implementation "org.graalvm.sdk:jniutils:24.1.0"
+    include "org.graalvm.sdk:jniutils:24.1.0"
+    
     // ICU4J is required for internationalization in GraalJS
     implementation "com.ibm.icu:icu4j:74.2"
     include "com.ibm.icu:icu4j:74.2"
