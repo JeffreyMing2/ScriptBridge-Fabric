@@ -1,6 +1,5 @@
 package net.mingpixel.scriptbridgeFabric.scripting;
 
-import net.minecraft.server.MinecraftServer;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Source;
 import org.slf4j.Logger;
@@ -14,12 +13,12 @@ import java.util.stream.Stream;
 public class ScriptManager {
     private static final Logger LOGGER = LoggerFactory.getLogger("ScriptBridge-Manager");
     private Context context;
-    private final MinecraftServer server;
     private final Path scriptsDir;
+    private final Object apiInstance;
 
-    public ScriptManager(MinecraftServer server, Path gameDir) {
-        this.server = server;
-        this.scriptsDir = gameDir.resolve("scripts");
+    public ScriptManager(Path scriptsDir, Object apiInstance) {
+        this.scriptsDir = scriptsDir;
+        this.apiInstance = apiInstance;
         initializeContext();
     }
 
@@ -32,10 +31,9 @@ public class ScriptManager {
                     .build();
             
             // Bind the API
-            ScriptApi api = new ScriptApi(server);
-            context.getBindings("js").putMember("game", api);
+            context.getBindings("js").putMember("game", apiInstance);
             
-            LOGGER.info("Scripting engine initialized.");
+            LOGGER.info("Scripting engine initialized for path: {}", scriptsDir);
         } catch (Exception e) {
             LOGGER.error("Failed to initialize scripting engine", e);
         }
@@ -46,7 +44,8 @@ public class ScriptManager {
             try {
                 Files.createDirectories(scriptsDir);
                 LOGGER.info("Created scripts directory at {}", scriptsDir);
-                createSampleScript();
+                // Sample script creation is delegated or handled externally if needed
+                // For now, we won't auto-create sample scripts here to avoid confusion between client/server
             } catch (IOException e) {
                 LOGGER.error("Failed to create scripts directory", e);
                 return;
@@ -62,25 +61,6 @@ public class ScriptManager {
         }
     }
 
-    private void createSampleScript() {
-        try {
-            String sample = """
-                            // Sample Script
-                            game.log('Hello from Javascript!');
-                            game.broadcast('ScriptBridge loaded!');
-                            
-                            // Example: Modify player (uncomment to use)
-                            // game.modifyPlayer('Dev', 'health', 20.0);
-                            
-                            // Example: Spawn block (uncomment to use)
-                            // game.spawnBlock(0, 100, 0, 'minecraft:diamond_block');
-                            """;
-            Files.writeString(scriptsDir.resolve("example.js"), sample);
-        } catch (IOException e) {
-            LOGGER.error("Failed to create sample script", e);
-        }
-    }
-
     public void executeScript(Path path) {
         try {
             Source source = Source.newBuilder("js", path.toFile()).build();
@@ -91,6 +71,14 @@ public class ScriptManager {
         } catch (Exception e) {
             LOGGER.error("Error executing script: " + path, e);
         }
+    }
+    
+    public void reload() {
+        LOGGER.info("Reloading scripts...");
+        close();
+        initializeContext();
+        loadScripts();
+        LOGGER.info("Scripts reloaded.");
     }
     
     public void close() {

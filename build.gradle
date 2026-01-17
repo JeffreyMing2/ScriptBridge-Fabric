@@ -47,12 +47,16 @@ dependencies {
     // GraalJS for scripting
     implementation "org.graalvm.polyglot:polyglot:24.1.0"
     implementation "org.graalvm.polyglot:js:24.1.0"
+    implementation "org.graalvm.sdk:collections:24.1.0"
+    implementation "org.graalvm.truffle:truffle-api:24.1.0"
     
     // We include polyglot, but 'js' is a POM, so we might need to rely on transitive includes 
     // or manually include the jars if Loom doesn't handle POM includes well.
     // For now, let's include polyglot and hope for the best, or check if we need js-language.
     include "org.graalvm.polyglot:polyglot:24.1.0"
     include "org.graalvm.polyglot:js:24.1.0"
+    include "org.graalvm.sdk:collections:24.1.0"
+    include "org.graalvm.truffle:truffle-api:24.1.0"
 }
 
 processResources {
