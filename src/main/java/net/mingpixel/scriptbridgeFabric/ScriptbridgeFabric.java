@@ -1,5 +1,7 @@
 package net.mingpixel.scriptbridgeFabric;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -8,14 +10,13 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
+import net.minecraft.entity.Entity;
 import net.mingpixel.scriptbridgeFabric.scripting.ScriptManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.entity.Entity;
 
 public class ScriptbridgeFabric implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("ScriptBridge");
@@ -36,7 +37,14 @@ public class ScriptbridgeFabric implements ModInitializer {
         });
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            if (handler.player.hasPermissionLevel(2)) {
+            boolean isOp = false;
+            for (String op : server.getPlayerManager().getOpList().getNames()) {
+                if (op.equalsIgnoreCase(handler.player.getName().getString())) {
+                    isOp = true;
+                    break;
+                }
+            }
+            if (isOp) {
                 handler.player.sendMessage(
                     Text.literal("[ScriptBridge] ").formatted(Formatting.GOLD)
                         .append(Text.literal("服务端模组加载成功！脚本系统已就绪。").formatted(Formatting.GREEN)),
@@ -47,6 +55,29 @@ public class ScriptbridgeFabric implements ModInitializer {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(CommandManager.literal("script")
+                .then(CommandManager.literal("run")
+                    .then(CommandManager.argument("filename", StringArgumentType.string())
+                        .suggests((context, builder) -> {
+                            if (scriptManager != null) {
+                                for (String script : scriptManager.getScriptList()) {
+                                    builder.suggest(script);
+                                }
+                            }
+                            return builder.buildFuture();
+                        })
+                        .executes(context -> {
+                            String filename = StringArgumentType.getString(context, "filename");
+                            if (scriptManager != null) {
+                                context.getSource().sendFeedback(() -> Text.literal("正在执行脚本: " + filename).formatted(Formatting.YELLOW), false);
+                                scriptManager.executeScript(filename);
+                                context.getSource().sendFeedback(() -> Text.literal("脚本执行完成。").formatted(Formatting.GREEN), false);
+                            } else {
+                                context.getSource().sendError(Text.literal("脚本管理器未初始化！"));
+                            }
+                            return 1;
+                        })
+                    )
+                )
                 .then(CommandManager.literal("list")
                     .executes(context -> {
                         if (scriptManager != null) {

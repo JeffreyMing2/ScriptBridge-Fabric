@@ -65,6 +65,15 @@ public class ScriptManager {
         }
     }
 
+    public void executeScript(String filename) {
+        Path scriptPath = scriptsDir.resolve(filename);
+        if (Files.exists(scriptPath) && Files.isRegularFile(scriptPath)) {
+            executeScript(scriptPath);
+        } else {
+            LOGGER.warn("Script not found: {}", filename);
+        }
+    }
+
     public void executeScript(Path path) {
         try {
             Source source = Source.newBuilder("js", path.toFile()).build();
