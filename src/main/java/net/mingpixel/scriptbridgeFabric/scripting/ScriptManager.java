@@ -46,6 +46,8 @@ public class ScriptManager {
             
             // Bind the API
             context.getBindings("js").putMember("game", apiInstance);
+            // Bind the Mappings helper for class resolution
+            context.getBindings("js").putMember("Mappings", new ScriptMappings());
             
             LOGGER.info("Scripting engine initialized for path: {}", scriptsDir);
         } catch (Throwable e) {
