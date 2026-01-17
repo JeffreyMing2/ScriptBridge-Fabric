@@ -146,7 +146,7 @@ public class ScriptManager {
         try (Stream<Path> paths = Files.walk(scriptsDir)) {
             return paths.filter(Files::isRegularFile)
                         .filter(p -> p.toString().endsWith(".js"))
-                        .map(p -> scriptsDir.relativize(p).toString())
+                        .map(p -> scriptsDir.relativize(p).toString().replace("\\", "/")) // Fix Windows path separators
                         .collect(Collectors.toList());
         } catch (IOException e) {
             LOGGER.error("Failed to list scripts", e);
