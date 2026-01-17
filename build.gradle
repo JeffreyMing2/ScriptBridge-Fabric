@@ -87,9 +87,9 @@ dependencies {
     implementation "org.graalvm.sdk:graal-sdk:24.1.0"
     include "org.graalvm.sdk:graal-sdk:24.1.0"
 
-    // ICU4J is required for internationalization in GraalJS
-    implementation "com.ibm.icu:icu4j:74.2"
-    include "com.ibm.icu:icu4j:74.2"
+    // ICU4J (Shadowed) for GraalJS - Required to match GraalVM's expected package namespace
+    implementation "org.graalvm.shadowed:icu4j:24.1.0"
+    include "org.graalvm.shadowed:icu4j:24.1.0"
 }
 
 processResources {
