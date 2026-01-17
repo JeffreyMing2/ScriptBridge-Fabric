@@ -60,8 +60,15 @@ dependencies {
     implementation "org.graalvm.sdk:collections:24.1.0"
     include "org.graalvm.sdk:collections:24.1.0"
     
+    // Truffle Libraries (Essential for GraalJS)
+    implementation "org.graalvm.truffle:truffle-runtime:24.1.0"
+    include "org.graalvm.truffle:truffle-runtime:24.1.0"
+    
     implementation "org.graalvm.truffle:truffle-api:24.1.0"
     include "org.graalvm.truffle:truffle-api:24.1.0"
+    
+    implementation "org.graalvm.truffle:truffle-dsl-processor:24.1.0"
+    include "org.graalvm.truffle:truffle-dsl-processor:24.1.0"
     
     // Native Image support (contains ImageInfo)
     implementation "org.graalvm.sdk:nativeimage:24.1.0"

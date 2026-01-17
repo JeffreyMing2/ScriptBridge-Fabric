@@ -60,7 +60,7 @@ public class ScriptbridgeFabricClient implements ClientModInitializer {
         });
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            dispatcher.register(ClientCommandManager.literal("script")
+            dispatcher.register(ClientCommandManager.literal("cscript")
                 .then(ClientCommandManager.literal("run")
                     .then(ClientCommandManager.argument("filename", StringArgumentType.string())
                         .suggests((context, builder) -> {

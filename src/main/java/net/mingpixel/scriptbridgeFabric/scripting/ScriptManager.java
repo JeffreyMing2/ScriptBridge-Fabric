@@ -29,9 +29,14 @@ public class ScriptManager {
     private void initializeContext() {
         try {
             // Initialize GraalVM context with access to Java
+            // Explicitly use the class loader of the current class (Mod ClassLoader)
+            // This is critical for Fabric/Knot environments to find GraalVM languages and resources
             this.context = Context.newBuilder("js")
                     .allowAllAccess(true)
+                    .allowHostAccess(org.graalvm.polyglot.HostAccess.ALL)
+                    .allowHostClassLookup(s -> true)
                     .option("engine.WarnInterpreterOnly", "false") // Suppress warning if running without GraalVM JDK
+                    .hostClassLoader(this.getClass().getClassLoader()) // CRITICAL FIX: Set correct ClassLoader
                     .build();
             
             // Bind the API
@@ -40,6 +45,7 @@ public class ScriptManager {
             LOGGER.info("Scripting engine initialized for path: {}", scriptsDir);
         } catch (Throwable e) {
             LOGGER.error("Failed to initialize scripting engine", e);
+            throw new RuntimeException("GraalJS initialization failed", e); // Re-throw to make it visible
         }
     }
 
