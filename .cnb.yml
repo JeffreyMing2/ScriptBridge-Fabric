@@ -1,11 +1,37 @@
 # CNB构建配置文件
 # 文档参考：https://docs.cnb.cool/zh/grammar/pipeline.html
 
+# 触发规则：在 main 分支推送时触发
 main:
   push:
     - stages:
-        - name: 编译
+        - name: 编译与构建
+          # 使用 Eclipse Temurin JDK 21，与项目 Java 版本一致
           image: docker.io/library/eclipse-temurin:21-jdk
+          
+          # 缓存配置：缓存 Gradle 依赖和 Wrapper，以及 Fabric Loom 的缓存
+          # 这能显著加快非首次构建的速度
+          caches:
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
+            - .gradle/loom-cache
+          
           script:
+            - echo "🔍 检查环境信息..."
+            - java -version
+            
+            - echo "🚀 开始构建..."
             - chmod +x gradlew
-            - ./gradlew build
+            
+            # 执行构建
+            # --no-daemon: CI 环境不使用守护进程，节省资源
+            # --build-cache: 开启 Gradle 构建缓存
+            # --stacktrace: 出错时打印堆栈信息
+            - ./gradlew build --no-daemon --build-cache --stacktrace
+            
+            - echo "✅ 构建完成！检查产物..."
+            - ls -lh build/libs/
+
+            # (可选) 如果后续需要发布，可以在此处添加发布命令
+            # 需先在平台设置环境变量
+            # - ./gradlew publish
