@@ -48,9 +48,9 @@ public class ClientScriptApi implements IScriptApi {
 
     /**
      * Exposes the raw MinecraftClient instance to scripts.
-     * This allows scripts to access client-side features without needing manual reflection/mappings lookup.
+     * Returns Object to avoid class loading issues in GraalJS if the class is remapped.
      */
-    public MinecraftClient getMinecraft() {
+    public Object getMinecraft() {
         return client;
     }
 
