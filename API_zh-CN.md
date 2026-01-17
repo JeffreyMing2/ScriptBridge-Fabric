@@ -1,91 +1,109 @@
 # ScriptBridge-Fabric API 文档
 
-ScriptBridge-Fabric 向所有 JavaScript 脚本暴露了一个名为 `game` 的全局对象。根据脚本是在 **客户端 (Client)** 还是 **服务端 (Server)** 运行，该对象提供的方法会有所不同。
-
-## 全局方法 (客户端和服务端均可用)
-
-### `game.setDebugMode(boolean debug)`
-启用或禁用当前脚本引擎的调试模式。
-- **debug**: `true` 启用，`false` 禁用。
-- **效果**: 启用后，`game.log()` 的消息也会显示在游戏内聊天栏（客户端）或广播给管理员（服务端）。
+ScriptBridge-Fabric 提供了两层 API：
+1. **辅助 API** (`game` 对象)：用于简化常见操作。
+2. **原生 Java API** (GraalVM)：用于完全访问 Minecraft 内部机制。
 
 ---
 
-## 服务端 API (`scripts/server/`)
+## 1. 辅助 API (`game` 对象)
 
-这些方法仅在脚本运行于服务端环境时可用。
+`game` 对象为常见任务提供了一个简化的接口。
 
-### `game.log(String message)`
-记录一条消息到服务端控制台。
-- **message**: 要记录的字符串。
-- **注意**: 如果开启了调试模式，该消息也会广播给玩家。
+### 全局方法
+*在客户端和服务端均可用。*
 
-### `game.broadcast(String message)`
-向服务器上的所有玩家广播一条消息。
-- **message**: 消息内容。
-- **前缀**: 消息将带有 `[ScriptBridge]` 前缀。
-
-### `game.modifyPlayer(String playerName, String attribute, double value)`
-修改玩家的特定属性。
-- **playerName**: 目标玩家的名称。
-- **attribute**: 要修改的属性。支持的值：
-  - `"health"`: 设置玩家的生命值。
-  - `"food"`: 设置玩家的饱食度。
-- **value**: 该属性的新值。
-
-### `game.spawnBlock(int x, int y, int z, String blockId)`
-在主世界的指定坐标设置一个方块。
-- **x, y, z**: 坐标。
-- **blockId**: 方块的资源标识符 (例如 `"minecraft:stone"`, `"minecraft:diamond_block"`)。
+#### `game.setDebugMode(boolean debug)`
+启用或禁用调试模式。
+- **debug**: `true` 启用。
+- **效果**: 日志将广播到聊天栏/控制台。
 
 ---
 
-## 客户端 API (`scripts/client/`)
+### 服务端辅助 API
+*仅在 `scripts/server/` 中可用。*
 
-这些方法仅在脚本运行于客户端环境时可用。
+#### `game.log(String message)`
+记录到服务端控制台（如果开启调试模式也会发送到聊天栏）。
 
-### `game.log(String message)`
-记录一条消息到客户端日志 (游戏输出)。
-- **message**: 要记录的字符串。
-- **注意**: 如果开启了调试模式，该消息也会显示在本地聊天栏中。
+#### `game.broadcast(String message)`
+向所有玩家广播消息。
 
-### `game.chat(String message)`
-在玩家的本地聊天栏中显示一条消息 (仅玩家自己可见)。
-- **message**: 消息内容。
-- **前缀**: 消息将带有 `[ScriptBridge]` 前缀。
+#### `game.modifyPlayer(String playerName, String attribute, double value)`
+修改玩家属性。
+- **attribute**: `"health"` (生命值), `"food"` (饱食度)。
 
-### `game.sendChatMessage(String message)`
-模拟玩家输入并发送聊天消息或命令到服务器。
-- **message**: 要发送的文本。可以是聊天消息或命令 (以 `/` 开头)。
-
-### `game.getPlayerName()`
-获取当前客户端玩家的名称。
-- **返回**: `String` - 玩家名称。
+#### `game.spawnBlock(int x, int y, int z, String blockId)`
+在主世界生成方块。
 
 ---
 
-## 示例
+### 客户端辅助 API
+*仅在 `scripts/client/` 中可用。*
 
-### 客户端脚本 (`scripts/client/hello.js`)
+#### `game.log(String message)`
+记录到客户端日志。
+
+#### `game.chat(String message)`
+在本地聊天栏显示消息（仅客户端可见）。
+
+#### `game.sendChatMessage(String message)`
+向服务器发送消息或命令。
+
+#### `game.getPlayerName()`
+获取当前玩家名称。
+
+---
+
+## 2. 高级功能: 直接 Java 访问
+
+ScriptBridge 使用 **GraalVM** 并开启了 `allowAllAccess(true)`，这意味着你可以使用 `Java.type()` 访问游戏或模组环境中的 **任何 Java 类**。
+
+### 用法
 ```javascript
-// 在本地聊天栏说你好
-game.chat("你好 " + game.getPlayerName() + "!");
-
-// 发送消息给服务器（所有人可见）
-game.sendChatMessage("大家好！");
-
-// 记录到控制台
-game.log("客户端脚本已执行。");
+const JavaString = Java.type('java.lang.String');
+const System = Java.type('java.lang.System');
 ```
 
-### 服务端脚本 (`scripts/server/admin.js`)
+### 客户端原生示例
+你可以直接访问 `MinecraftClient`。
+
 ```javascript
-// 广播给所有玩家
-game.broadcast("服务器将在 5 分钟后维护！");
+// scripts/client/native_test.js
+const MinecraftClient = Java.type('net.minecraft.client.MinecraftClient');
+const Text = Java.type('net.minecraft.text.Text');
 
-// 治疗名为 'Steve' 的玩家
-game.modifyPlayer("Steve", "health", 20.0);
+// 获取客户端实例
+const client = MinecraftClient.getInstance();
 
-// 放置一个方块
-game.spawnBlock(0, 100, 0, "minecraft:gold_block");
+// 检查玩家是否存在
+if (client.player != null) {
+    // 发送原始数据包或修改客户端状态
+    client.player.sendMessage(Text.of("§a来自原生 Java API 的问候！"), false);
+    
+    // 示例: 设置 FOV (如果可访问) 或其他选项
+    // client.options.fov.setValue(110.0); 
+}
 ```
+
+### 服务端原生示例
+你可以访问 `MinecraftServer` 和内部逻辑。
+
+```javascript
+// scripts/server/native_test.js
+const Items = Java.type('net.minecraft.item.Items');
+const ItemStack = Java.type('net.minecraft.item.ItemStack');
+
+// 注意: 访问服务器实例通常需要从上下文或静态辅助类中获取
+// 因为 'game' 对象实现持有服务器实例，你可能需要反射或静态 getter。
+// 不过，许多 Fabric 类都有静态注册表。
+
+// 示例: 打印注册表条目名称
+const stone = Items.STONE;
+game.log("原生物品名称: " + stone.toString());
+```
+
+### 重要提示
+- **映射 (Mappings)**: 你必须使用正确的类名（取决于运行时环境是 Intermediary 还是 Yarn）。在生产环境的 Fabric 环境中（已重映射），如果不是在带有 Yarn 映射的开发环境中运行，你可能需要使用 Intermediary 名称，或者依赖模组加载器的重映射处理。*对于大多数最终用户，此功能是实验性的，并且依赖于运行时映射。*
+- **反射**: 如果需要，你可以使用 Java 反射。
+- **权限**: 这允许你做模组能做的任何事情。请谨慎使用。

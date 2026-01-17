@@ -65,6 +65,8 @@ game.spawnBlock(0, 80, 0, "minecraft:diamond_block");
 
 For a full list of available methods and objects, please refer to the [API Documentation](API.md).
 
+For developers using VS Code or other IDEs, a TypeScript declaration file is available at [`scriptbridge.d.ts`](scriptbridge.d.ts) for autocomplete support.
+
 ## Building from Source
 
 To build the mod yourself:

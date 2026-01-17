@@ -63,6 +63,8 @@ game.spawnBlock(0, 80, 0, "minecraft:diamond_block");
 
 有关可用方法和对象的完整列表，请参阅 [API 文档](API_zh-CN.md)。
 
+对于使用 VS Code 或其他 IDE 的开发者，项目中包含了一个 [`scriptbridge.d.ts`](scriptbridge.d.ts) TypeScript 声明文件，可提供代码自动补全支持。
+
 ## 源码构建
 
 如果你想自己构建模组：

@@ -2,92 +2,110 @@
 
 [中文文档](API_zh-CN.md)
 
-ScriptBridge-Fabric exposes a global object named `game` to all JavaScript scripts. This object provides different methods depending on whether the script is running on the **Client** or the **Server**.
-
-## Global Methods (Available in both Client and Server)
-
-### `game.setDebugMode(boolean debug)`
-Enables or disables debug mode for the current script engine.
-- **debug**: `true` to enable, `false` to disable.
-- **Effect**: When enabled, `game.log()` messages are also shown in the in-game chat (client-side) or broadcast to ops (server-side).
+ScriptBridge-Fabric provides two layers of API:
+1. The **Helper API** (`game` object) for simplified interaction.
+2. The **Native Java API** (GraalVM) for full access to Minecraft internals.
 
 ---
 
-## Server API (`scripts/server/`)
+## 1. Helper API (`game` Object)
 
-These methods are available only when the script is running in the server environment.
+The `game` object provides a simplified interface for common tasks.
 
-### `game.log(String message)`
-Logs a message to the server console.
-- **message**: The string to log.
-- **Note**: If debug mode is on, it broadcasts to players.
+### Global Methods
+*Available in both Client and Server.*
 
-### `game.broadcast(String message)`
-Broadcasts a message to all players on the server.
-- **message**: The message content.
-- **Prefix**: Messages are prefixed with `[ScriptBridge]`.
-
-### `game.modifyPlayer(String playerName, String attribute, double value)`
-Modifies a specific attribute of a player.
-- **playerName**: The name of the target player.
-- **attribute**: The attribute to modify. Supported values:
-  - `"health"`: Sets the player's health.
-  - `"food"`: Sets the player's food level.
-- **value**: The new value for the attribute.
-
-### `game.spawnBlock(int x, int y, int z, String blockId)`
-Sets a block at the specified coordinates in the Overworld.
-- **x, y, z**: The coordinates.
-- **blockId**: The resource identifier of the block (e.g., `"minecraft:stone"`, `"minecraft:diamond_block"`).
+#### `game.setDebugMode(boolean debug)`
+Enables or disables debug mode.
+- **debug**: `true` to enable.
+- **Effect**: Logs are broadcasted to chat/console.
 
 ---
 
-## Client API (`scripts/client/`)
+### Server Helper API
+*Available in `scripts/server/`.*
 
-These methods are available only when the script is running in the client environment.
+#### `game.log(String message)`
+Logs to server console (and chat if debug is on).
 
-### `game.log(String message)`
-Logs a message to the client log (game output).
-- **message**: The string to log.
-- **Note**: If debug mode is on, it shows in the local chat.
+#### `game.broadcast(String message)`
+Broadcasts to all players.
 
-### `game.chat(String message)`
-Displays a message in the player's local chat (only visible to the player).
-- **message**: The message content.
-- **Prefix**: Messages are prefixed with `[ScriptBridge]`.
+#### `game.modifyPlayer(String playerName, String attribute, double value)`
+Modifies player stats.
+- **attribute**: `"health"`, `"food"`.
 
-### `game.sendChatMessage(String message)`
-Sends a chat message or command to the server as if the player typed it.
-- **message**: The text to send. Can be a chat message or a command (starting with `/`).
-
-### `game.getPlayerName()`
-Returns the name of the current client player.
-- **Returns**: `String` - The player's name.
+#### `game.spawnBlock(int x, int y, int z, String blockId)`
+Sets a block in the Overworld.
 
 ---
 
-## Examples
+### Client Helper API
+*Available in `scripts/client/`.*
 
-### Client Script (`scripts/client/hello.js`)
+#### `game.log(String message)`
+Logs to client output.
+
+#### `game.chat(String message)`
+Shows a message in local chat (client-only).
+
+#### `game.sendChatMessage(String message)`
+Sends a message or command to the server.
+
+#### `game.getPlayerName()`
+Returns the current player's name.
+
+---
+
+## 2. Advanced: Native Java Access
+
+ScriptBridge uses **GraalVM** with `allowAllAccess(true)`, meaning you can access **any Java class** in the game or mod environment using `Java.type()`.
+
+### Usage
 ```javascript
-// Say hello in local chat
-game.chat("Hello " + game.getPlayerName() + "!");
-
-// Send a message to the server
-game.sendChatMessage("Hello everyone!");
-
-// Log to console
-game.log("Client script executed.");
+const JavaString = Java.type('java.lang.String');
+const System = Java.type('java.lang.System');
 ```
 
-### Server Script (`scripts/server/admin.js`)
+### Client-Side Native Examples
+You can access `MinecraftClient` directly.
+
 ```javascript
-// Broadcast to all players
-game.broadcast("Server maintenance in 5 minutes!");
+// scripts/client/native_test.js
+const MinecraftClient = Java.type('net.minecraft.client.MinecraftClient');
+const Text = Java.type('net.minecraft.text.Text');
 
-// Heal a player named 'Steve'
-game.modifyPlayer("Steve", "health", 20.0);
+// Get the client instance
+const client = MinecraftClient.getInstance();
 
-// Place a block
-game.spawnBlock(0, 100, 0, "minecraft:gold_block");
+// Check if player exists
+if (client.player != null) {
+    // Send a raw packet or modify client state
+    client.player.sendMessage(Text.of("§aHello from Native Java API!"), false);
+    
+    // Example: Set FOV (if accessible) or other options
+    // client.options.fov.setValue(110.0); 
+}
 ```
+
+### Server-Side Native Examples
+You can access `MinecraftServer` and internal logic.
+
+```javascript
+// scripts/server/native_test.js
+const Items = Java.type('net.minecraft.item.Items');
+const ItemStack = Java.type('net.minecraft.item.ItemStack');
+
+// Note: Accessing server instance usually requires getting it from a context or static helper
+// Since 'game' object implementation holds the server, you might need reflection or static getters if available.
+// However, many Fabric classes have static registries.
+
+// Example: Print a registry entry name
+const stone = Items.STONE;
+game.log("Native Item Name: " + stone.toString());
+```
+
+### Important Notes
+- **Mappings**: You must use the correct class names (Intermediary or Yarn, depending on the runtime environment). In a production Fabric environment (Remapped), you might need to use Intermediary names if not running in a dev environment with Yarn mappings, OR the mod loader handles remapping. *For most end-users, this feature is experimental and depends on the runtime mappings.*
+- **Reflection**: You can use Java reflection if needed.
+- **Power**: This allows you to do ANYTHING a mod can do. Use with caution.

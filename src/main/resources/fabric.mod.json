@@ -3,7 +3,7 @@
   "id": "scriptbridge-fabric",
   "version": "${version}",
   "name": "ScriptBridge-Fabric",
-  "description": "",
+  "description": "A Fabric mod that enables dynamic JavaScript (GraalVM) scripting for both client and server, featuring hot reloading and easy API access.",
   "authors": [],
   "contact": {},
   "license": "MIT",
