@@ -1,91 +1,124 @@
-# ScriptBridge-Fabric
+# <img src="images/logo.png" alt="ScriptBridge Logo" width="64" height="64" align="center"/> ScriptBridge-Fabric
 
-[中文文档](README_zh-CN.md)
+[![Fabric](https://img.shields.io/badge/Modloader-Fabric-blue?style=flat-square)](https://fabricmc.net/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
+[![GraalVM](https://img.shields.io/badge/Powered%20By-GraalVM-orange?style=flat-square)](https://www.graalvm.org/)
 
-ScriptBridge-Fabric is a Minecraft Fabric mod that enables dynamic scripting capabilities using **JavaScript (GraalVM)**. It bridges the gap between Minecraft internals and runtime scripting, allowing you to run scripts on both the client and server sides without restarting the game.
+[**中文文档 (Chinese)**](README_zh-CN.md) | [**API Documentation**](API.md)
 
-## Features
+> **Unleash the power of JavaScript in Minecraft.**
+> ScriptBridge-Fabric bridges the gap between Minecraft internals and runtime scripting, allowing you to run dynamic JavaScript code on both the client and server sides without restarting the game.
 
-- **JavaScript Support**: Write scripts using modern JavaScript (ES6+) powered by GraalVM.
-- **Dual Environment**: specialized support for both **Client** and **Server** environments.
-- **Hot Reloading**: Reload scripts instantly with `/script reload`.
-- **API Access**: Interact with the game world, players, and chat through a simple `game` object.
-- **Debugging**: Built-in debug tools to trace script execution.
+---
 
-## Installation
+## 📖 Introduction
 
-1. Download the latest release from the releases page.
-2. Install [Fabric Loader](https://fabricmc.net/).
-3. Place the `scriptbridge-fabric-*.jar` file into your Minecraft `mods` folder.
-4. Launch the game.
+**ScriptBridge-Fabric** is a developer-friendly mod that embeds the **GraalVM** JavaScript engine into Minecraft. Unlike simple macro mods, ScriptBridge provides:
 
-## Directory Structure
+1.  **Full Native Access**: Access `net.minecraft.*` classes directly from JS.
+2.  **Dual Environment**: Distinct contexts for **Client** (UI, Rendering, Chat) and **Server** (World, Players, Logic).
+3.  **Hot Reloading**: Edit your scripts and apply changes instantly with `/script reload`.
 
-Upon first launch, the mod will create a `scripts` directory in your game folder (e.g., `.minecraft/scripts` or server root).
+Whether you want to automate server administration, create custom client-side HUDs, or prototype mod features, ScriptBridge is your tool.
 
-- **Client Scripts**: `scripts/client/`  
-  Scripts placed here run on your local game client.
-- **Server Scripts**: `scripts/server/`  
-  Scripts placed here run on the server (dedicated or singleplayer internal server).
+## ✨ Features
 
-## Usage
+- ⚡ **High Performance**: Powered by GraalVM for near-native execution speed.
+- 🔄 **Hot Reload**: No restart required. Tweak logic while the game runs.
+- 🛠️ **Helper API**: Built-in `game` object for common tasks (chat, logging, spawning blocks).
+- 🔓 **Unrestricted Access**: Use `Java.type()` to access any class in the classpath (Modders beware: great power comes with great responsibility!).
+- 💻 **TypeScript Support**: Includes type definitions for VS Code autocompletion.
+
+## 📸 Screenshots
+
+*(Add your screenshots here. For example: A script sending a chat message, or a server script spawning a structure.)*
+
+| Client Script Demo | Server Management |
+| :---: | :---: |
+| ![Client Demo](images/client_demo.png) | ![Server Demo](images/server_demo.png) |
+| *Custom HUD logic* | *Admin tools in action* |
+
+## 📥 Installation
+
+1.  **Prerequisites**: Install [Fabric Loader](https://fabricmc.net/) for your Minecraft version.
+2.  **Download**: Get the latest `scriptbridge-fabric-*.jar` from the [Releases](https://github.com/MingPixel/ScriptBridge-Fabric/releases) page.
+3.  **Install**: Drop the jar file into your `.minecraft/mods` folder.
+4.  **Launch**: Start the game. The `scripts` directory will be created automatically.
+
+## 🚀 Getting Started
+
+### Directory Structure
+
+After the first launch, you will see a `scripts` folder in your game directory:
+
+```text
+.minecraft/
+└── scripts/
+    ├── client/  <-- Scripts here run on your local client
+    └── server/  <-- Scripts here run on the internal/dedicated server
+```
+
+### Your First Script
+
+Create a file named `hello.js` in `scripts/client/`:
+
+```javascript
+// scripts/client/hello.js
+game.chat("Hello World from ScriptBridge!");
+game.log("This is a log message.");
+```
+
+Run it in-game:
+```mcfunction
+/script run hello.js
+```
 
 ### Commands
 
-The main command is `/script`.
-
 | Command | Description |
 | :--- | :--- |
-| `/script run <filename>` | Run a script. Defaults to client scripts if on client. |
-| `/script list` | List all available scripts in the current context. |
-| `/script reload` | Reload all scripts and refresh the environment. |
-| `/script debug` | Toggle debug mode (logs more info to chat). |
-| `/script openfile` | Open the scripts directory in your file explorer. |
-| `/script client run <file>` | Explicitly run a client script. |
-| `/script client list` | Explicitly list client scripts. |
-| `/script server run <file>` | Send a command to the server to run a script (requires OP). |
+| `/script run <file>` | Run a script (defaults to client side). |
+| `/script reload` | Reload all scripts and refresh the engine. |
+| `/script list` | Show available scripts. |
+| `/script debug` | Toggle debug output in chat. |
+| `/script openfile` | Open the scripts folder in your OS file manager. |
 
-### Writing Scripts
+## 📚 API Reference
 
-Create `.js` files in the appropriate directory. You can use the global `game` object to interact with Minecraft.
+ScriptBridge offers a two-layered API.
 
-**Example (`scripts/client/welcome.js`):**
-```javascript
-game.chat("Welcome back, " + game.getPlayerName() + "!");
-game.log("Welcome script executed.");
-```
+1.  **Helper API**: Quick and easy.
+    *   `game.chat(msg)`
+    *   `game.broadcast(msg)`
+    *   `game.spawnBlock(x,y,z,id)`
+    *   ...and more.
 
-**Example (`scripts/server/announce.js`):**
-```javascript
-game.broadcast("Hello from the server!");
-game.spawnBlock(0, 80, 0, "minecraft:diamond_block");
-```
+2.  **Native API**: Full Java access.
+    ```javascript
+    const MinecraftClient = Java.type('net.minecraft.client.MinecraftClient');
+    const client = MinecraftClient.getInstance();
+    ```
 
-## API Documentation
+👉 **[Read the Full API Documentation](API.md)**
 
-For a full list of available methods and objects, please refer to the [API Documentation](API.md).
+## 🧑‍💻 For Developers
 
-For developers using VS Code or other IDEs, a TypeScript declaration file is available at [`scriptbridge.d.ts`](scriptbridge.d.ts) for autocomplete support.
+We provide TypeScript definitions for a better coding experience.
 
-## Building from Source
+1.  Open the `scripts` folder in **VS Code**.
+2.  Copy `scriptbridge.d.ts` (found in the mod source or repo) to your workspace.
+3.  Enjoy full autocomplete for `game` and `Java` objects!
 
-To build the mod yourself:
+## 🤝 Contributing
 
-1. Clone the repository.
-2. Run the build command:
-   ```bash
-   ./gradlew build
-   ```
-3. The output jar will be in `build/libs/`.
+We welcome Pull Requests! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-## Contributing
+## 📄 License
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+This project is licensed under the [MIT License](LICENSE).
 
-## Community
+---
 
-- **Official QQ Group**: 1080675954
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+<p align="center">
+  Made with ❤️ by MingPixel
+</p>

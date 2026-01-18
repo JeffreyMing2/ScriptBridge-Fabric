@@ -1,89 +1,124 @@
-# ScriptBridge-Fabric
+# <img src="images/logo.png" alt="ScriptBridge Logo" width="64" height="64" align="center"/> ScriptBridge-Fabric
 
-ScriptBridge-Fabric 是一个 Minecraft Fabric 模组，它启用了使用 **JavaScript (GraalVM)** 进行动态脚本编写的功能。它连接了 Minecraft 内部机制和运行时脚本，允许你在客户端和服务器端运行脚本，而无需重启游戏。
+[![Fabric](https://img.shields.io/badge/Modloader-Fabric-blue?style=flat-square)](https://fabricmc.net/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
+[![GraalVM](https://img.shields.io/badge/Powered%20By-GraalVM-orange?style=flat-square)](https://www.graalvm.org/)
 
-## 功能特性
+[**English Documentation**](README.md) | [**API 文档**](API_zh-CN.md)
 
-- **JavaScript 支持**: 使用由 GraalVM 支持的现代 JavaScript (ES6+) 编写脚本。
-- **双端支持**: 分别为 **客户端** 和 **服务端** 环境提供专门支持。
-- **热重载**: 使用 `/script reload` 命令即可瞬间重载脚本。
-- **API 访问**: 通过简单的 `game` 对象与游戏世界、玩家和聊天栏进行交互。
-- **调试功能**: 内置调试工具，方便追踪脚本执行情况。
+> **在 Minecraft 中释放 JavaScript 的力量。**
+> ScriptBridge-Fabric 连接了 Minecraft 内部机制与运行时脚本，让你无需重启游戏即可在客户端和服务端运行动态 JavaScript 代码。
 
-## 安装
+---
 
-1. 从发布页面下载最新版本。
-2. 安装 [Fabric Loader](https://fabricmc.net/)。
-3. 将 `scriptbridge-fabric-*.jar` 文件放入你的 Minecraft `mods` 文件夹中。
-4. 启动游戏。
+## 📖 简介
 
-## 目录结构
+**ScriptBridge-Fabric** 是一个开发者友好的模组，它将 **GraalVM** JavaScript 引擎嵌入到了 Minecraft 中。与简单的宏模组不同，ScriptBridge 提供：
 
-首次启动时，模组会在你的游戏文件夹中创建一个 `scripts` 目录（例如 `.minecraft/scripts` 或服务器根目录）。
+1.  **完全原生访问**: 可直接从 JS 访问 `net.minecraft.*` 类。
+2.  **双端环境**: 区分 **客户端** (UI, 渲染, 聊天) 和 **服务端** (世界, 玩家, 逻辑) 的独立运行上下文。
+3.  **热重载**: 编辑脚本并使用 `/script reload` 瞬间应用更改。
 
-- **客户端脚本**: `scripts/client/`  
-  放置在这里的脚本将在你的本地游戏客户端上运行。
-- **服务端脚本**: `scripts/server/`  
-  放置在这里的脚本将在服务器上运行（包括专用服务器或单人游戏的内置服务端）。
+无论你是想自动化服务器管理、创建自定义客户端 HUD，还是快速验证模组功能原型，ScriptBridge 都是你的得力工具。
 
-## 使用说明
+## ✨ 功能特性
 
-### 命令
+- ⚡ **高性能**: 由 GraalVM 驱动，提供近乎原生的执行速度。
+- 🔄 **热重载**: 无需重启。在游戏运行时即可调整逻辑。
+- 🛠️ **辅助 API**: 内置 `game` 对象，处理常用任务（聊天、日志、生成方块）。
+- 🔓 **无限制访问**: 使用 `Java.type()` 访问类路径中的任何类（模组开发者请注意：能力越大，责任越大！）。
+- 💻 **TypeScript 支持**: 包含类型定义文件，支持 VS Code 自动补全。
 
-主要命令是 `/script`。
+## 📸 截图展示
+
+*(在此处添加截图。例如：发送聊天消息的脚本，或生成结构的服务器脚本。)*
+
+| 客户端脚本演示 | 服务端管理演示 |
+| :---: | :---: |
+| ![Client Demo](images/client_demo.png) | ![Server Demo](images/server_demo.png) |
+| *自定义 HUD 逻辑* | *管理员工具实战* |
+
+## 📥 安装指南
+
+1.  **前置要求**: 为你的 Minecraft 版本安装 [Fabric Loader](https://fabricmc.net/)。
+2.  **下载**: 从 [Releases](https://github.com/MingPixel/ScriptBridge-Fabric/releases) 页面下载最新的 `scriptbridge-fabric-*.jar`。
+3.  **安装**: 将 jar 文件放入 `.minecraft/mods` 文件夹。
+4.  **启动**: 启动游戏。`scripts` 目录将自动生成。
+
+## 🚀 快速上手
+
+### 目录结构
+
+首次启动后，你会在游戏目录下看到 `scripts` 文件夹：
+
+```text
+.minecraft/
+└── scripts/
+    ├── client/  <-- 此处的脚本在本地客户端运行
+    └── server/  <-- 此处的脚本在内置/专用服务端运行
+```
+
+### 你的第一个脚本
+
+在 `scripts/client/` 中创建一个名为 `hello.js` 的文件：
+
+```javascript
+// scripts/client/hello.js
+game.chat("Hello World from ScriptBridge!");
+game.log("这是一条日志消息。");
+```
+
+在游戏中运行：
+```mcfunction
+/script run hello.js
+```
+
+### 常用命令
 
 | 命令 | 描述 |
 | :--- | :--- |
-| `/script run <文件名>` | 运行一个脚本。如果在客户端，默认运行客户端脚本。 |
-| `/script list` | 列出当前环境下所有可用的脚本。 |
-| `/script reload` | 重载所有脚本并刷新环境。 |
-| `/script debug` | 切换调试模式（在聊天栏显示更多信息）。 |
-| `/script openfile` | 在文件管理器中打开脚本目录。 |
-| `/script client run <文件>` | 显式运行一个客户端脚本。 |
-| `/script client list` | 显式列出客户端脚本。 |
-| `/script server run <文件>` | 发送命令到服务器运行脚本（需要 OP 权限）。 |
+| `/script run <文件>` | 运行脚本（在客户端默认运行客户端脚本）。 |
+| `/script reload` | 重载所有脚本并刷新引擎。 |
+| `/script list` | 显示可用脚本列表。 |
+| `/script debug` | 切换聊天栏调试输出。 |
+| `/script openfile` | 在系统文件管理器中打开脚本文件夹。 |
 
-### 编写脚本
+## 📚 API 参考
 
-在相应的目录中创建 `.js` 文件。你可以使用全局 `game` 对象与 Minecraft 进行交互。
+ScriptBridge 提供两层 API。
 
-**示例 (`scripts/client/welcome.js`):**
-```javascript
-game.chat("欢迎回来, " + game.getPlayerName() + "!");
-game.log("欢迎脚本已执行。");
-```
+1.  **辅助 API**: 快速简单。
+    *   `game.chat(msg)`
+    *   `game.broadcast(msg)`
+    *   `game.spawnBlock(x,y,z,id)`
+    *   ...等等。
 
-**示例 (`scripts/server/announce.js`):**
-```javascript
-game.broadcast("来自服务器的问候！");
-game.spawnBlock(0, 80, 0, "minecraft:diamond_block");
-```
+2.  **原生 API**: 完整的 Java 访问权限。
+    ```javascript
+    const MinecraftClient = Java.type('net.minecraft.client.MinecraftClient');
+    const client = MinecraftClient.getInstance();
+    ```
 
-## API 文档
+👉 **[阅读完整 API 文档](API_zh-CN.md)**
 
-有关可用方法和对象的完整列表，请参阅 [API 文档](API_zh-CN.md)。
+## 🧑‍💻 开发者支持
 
-对于使用 VS Code 或其他 IDE 的开发者，项目中包含了一个 [`scriptbridge.d.ts`](scriptbridge.d.ts) TypeScript 声明文件，可提供代码自动补全支持。
+我们提供 TypeScript 定义文件以获得更好的编码体验。
 
-## 源码构建
+1.  在 **VS Code** 中打开 `scripts` 文件夹。
+2.  将 `scriptbridge.d.ts`（在模组源码或仓库中可以找到）复制到你的工作区。
+3.  享受 `game` 和 `Java` 对象的完整自动补全！
 
-如果你想自己构建模组：
+## 🤝 参与贡献
 
-1. 克隆仓库。
-2. 运行构建命令：
-   ```bash
-   ./gradlew build
-   ```
-3. 输出的 jar 文件将位于 `build/libs/` 目录下。
+我们欢迎 Pull Requests！详情请参阅 [贡献指南](CONTRIBUTING_zh-CN.md)。
 
-## 参与贡献
+## 📄 许可证
 
-我们欢迎各种形式的贡献！请查看 [贡献指南](CONTRIBUTING_zh-CN.md) 了解详情。
+本项目采用 [MIT 许可证](LICENSE)。
 
-## 社区与联系方式
+---
 
-- **官方交流群 (QQ)**: 1080675954
-
-## 许可证
-
-本项目采用 MIT 许可证 - 详情请参阅 [LICENSE](LICENSE) 文件。
+<p align="center">
+  Made with ❤️ by MingPixel
+</p>
