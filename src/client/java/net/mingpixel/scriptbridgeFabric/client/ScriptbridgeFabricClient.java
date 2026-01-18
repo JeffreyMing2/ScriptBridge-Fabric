@@ -11,7 +11,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import net.mingpixel.scriptbridgeFabric.scripting.ScriptManager;
+import net.minecraft.command.CommandSource;
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 public class ScriptbridgeFabricClient implements ClientModInitializer {
@@ -82,11 +84,9 @@ public class ScriptbridgeFabricClient implements ClientModInitializer {
                     .then(ClientCommandManager.argument("filename", StringArgumentType.string())
                         .suggests((context, builder) -> {
                             if (scriptManager != null) {
-                                for (String script : scriptManager.getScriptList()) {
-                                    builder.suggest(script);
-                                }
+                                return CommandSource.suggestMatching(scriptManager.getScriptList(), builder);
                             }
-                            return builder.buildFuture();
+                            return CommandSource.suggestMatching(Collections.emptyList(), builder);
                         })
                         .executes(context -> {
                             String filename = StringArgumentType.getString(context, "filename");
@@ -154,11 +154,9 @@ public class ScriptbridgeFabricClient implements ClientModInitializer {
                 .then(ClientCommandManager.argument("filename", StringArgumentType.string())
                     .suggests((context, builder) -> {
                         if (scriptManager != null) {
-                            for (String script : scriptManager.getScriptList()) {
-                                builder.suggest(script);
-                            }
+                            return CommandSource.suggestMatching(scriptManager.getScriptList(), builder);
                         }
-                        return builder.buildFuture();
+                        return CommandSource.suggestMatching(Collections.emptyList(), builder);
                     })
                     .executes(context -> {
                         String filename = StringArgumentType.getString(context, "filename");
