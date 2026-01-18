@@ -44,8 +44,8 @@ public class SimpleMappingLoader {
                     if (line.startsWith("tiny")) {
                         // Header: tiny	2	0	intermediary	named
                         for (int i = 0; i < parts.length; i++) {
-                            if (parts[i].equals("named")) namedIndex = i - 1; 
-                            if (parts[i].equals("intermediary")) intermediaryIndex = i - 1;
+                            if (parts[i].equals("named")) namedIndex = i - 3; 
+                            if (parts[i].equals("intermediary")) intermediaryIndex = i - 3;
                         }
                         continue;
                     }

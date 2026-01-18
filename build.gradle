@@ -113,7 +113,10 @@ task includeMappings(type: Copy) {
         if (yarnJar) {
             from(zipTree(yarnJar)) {
                 include 'mappings/mappings.tiny'
-                rename 'mappings.tiny', 'bundled_mappings.tiny'
+                eachFile { fcd ->
+                    fcd.path = 'bundled_mappings.tiny'
+                }
+                includeEmptyDirs = false
             }
         }
         
