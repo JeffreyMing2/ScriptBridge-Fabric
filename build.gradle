@@ -50,8 +50,8 @@ dependencies {
     include "org.graalvm.polyglot:polyglot:24.1.0"
 
     // JavaScript Language Implementation
-    implementation "org.graalvm.js:js:24.1.0"
-    include "org.graalvm.js:js:24.1.0"
+    // implementation "org.graalvm.js:js:24.1.0" // Removed to prevent POM/ZIP issues with js-community
+    // include "org.graalvm.js:js:24.1.0"
 
     implementation "org.graalvm.js:js-language:24.1.0"
     include "org.graalvm.js:js-language:24.1.0"
@@ -90,6 +90,36 @@ dependencies {
     // ICU4J (Shadowed) for GraalJS - Required to match GraalVM's expected package namespace
     implementation "org.graalvm.shadowed:icu4j:24.1.0"
     include "org.graalvm.shadowed:icu4j:24.1.0"
+}
+
+// Hook it into processResources
+processResources.dependsOn "includeMappings"
+
+// Configure task dependency after evaluation when all tasks are registered
+afterEvaluate {
+    if (tasks.findByName("sourcesJar")) {
+        tasks.named("sourcesJar").configure { dependsOn("includeMappings") }
+    }
+}
+
+task includeMappings(type: Copy) {
+    // Find the yarn mappings jar in the configuration
+    def yarnDependency = configurations.mappings.dependencies.find { it.name == 'yarn' && it.group == 'net.fabricmc' }
+    if (yarnDependency) {
+        // Resolve the file
+        def yarnJar = configurations.mappings.files.find { it.name.contains('yarn') }
+        
+        // Extract mappings.tiny from the jar
+        if (yarnJar) {
+            from(zipTree(yarnJar)) {
+                include 'mappings/mappings.tiny'
+                rename 'mappings.tiny', 'bundled_mappings.tiny'
+            }
+        }
+        
+        // Output to the mod's assets directory
+        into "src/main/resources/assets/${project.archives_base_name}/mappings"
+    }
 }
 
 processResources {

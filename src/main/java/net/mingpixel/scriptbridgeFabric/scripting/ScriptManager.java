@@ -59,6 +59,27 @@ public class ScriptManager {
             // Bind the Mappings helper for class resolution
             context.getBindings("js").putMember("Mappings", new ScriptMappings());
             
+            // Automatically wrap Java.type to handle remapping transparently
+            try {
+                String wrapperScript = 
+                    "const originalType = Java.type;" +
+                    "Java.type = function(name) {" +
+                    "    try {" +
+                    "        return originalType(name);" +
+                    "    } catch (e) {" +
+                    "        try {" +
+                    "            var resolved = Mappings.getClassName(name);" +
+                    "            return originalType(resolved);" +
+                    "        } catch (e2) {" +
+                    "            throw e;" + // Throw original error if mapping also fails
+                    "        }" +
+                    "    }" +
+                    "};";
+                context.eval("js", wrapperScript);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to inject Java.type wrapper", e);
+            }
+            
             LOGGER.info("Scripting engine initialized for path: {}", scriptsDir);
         } catch (Throwable e) {
             LOGGER.error("Failed to initialize scripting engine", e);
