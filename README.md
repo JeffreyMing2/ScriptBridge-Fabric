@@ -15,18 +15,18 @@
 
 **ScriptBridge-Fabric** is a developer-friendly mod that embeds the **GraalVM** JavaScript engine into Minecraft. Unlike simple macro mods, ScriptBridge provides:
 
-1.  **Full Native Access**: Access `net.minecraft.*` classes directly from JS.
-2.  **Dual Environment**: Distinct contexts for **Client** (UI, Rendering, Chat) and **Server** (World, Players, Logic).
-3.  **Hot Reloading**: Edit your scripts and apply changes instantly with `/script reload`.
-
-Whether you want to automate server administration, create custom client-side HUDs, or prototype mod features, ScriptBridge is your tool.
+1.  **Smart Native Access**: Access `net.minecraft.*` classes directly. The engine **automatically resolves mappings**, so your scripts work in both Dev (Named) and Production (Intermediary) environments!
+2.  **Safe Wrappers**: Use our high-level `ScriptPlayer`, `ScriptWorld`, and `ScriptInventory` APIs for stable and easy scripting.
+3.  **Dual Environment**: Distinct contexts for **Client** (UI, Rendering, Chat) and **Server** (World, Players, Logic).
+4.  **Hot Reloading**: Edit your scripts and apply changes instantly with `/script reload`.
 
 ## ✨ Features
 
 - ⚡ **High Performance**: Powered by GraalVM for near-native execution speed.
 - 🔄 **Hot Reload**: No restart required. Tweak logic while the game runs.
-- 🛠️ **Helper API**: Built-in `game` object for common tasks (chat, logging, spawning blocks).
-- 🔓 **Unrestricted Access**: Use `Java.type()` to access any class in the classpath (Modders beware: great power comes with great responsibility!).
+- 🛠️ **Helper API**: Built-in `game` object with rich wrappers (`game.getPlayer()`, `game.getWorld()`).
+- 🧠 **Auto-Remapping**: Write `net.minecraft.client.MinecraftClient` and let the mod handle the rest.
+- 🛡️ **Sandboxed**: Dangerous Java classes (`Runtime`, `Process`, `IO`) are blocked for security.
 - 💻 **TypeScript Support**: Includes type definitions for VS Code autocompletion.
 
 ## 📸 Screenshots
@@ -64,8 +64,11 @@ Create a file named `hello.js` in `scripts/client/`:
 
 ```javascript
 // scripts/client/hello.js
-game.chat("Hello World from ScriptBridge!");
-game.log("This is a log message.");
+var player = game.getPlayer();
+if (player) {
+    player.chat("Hello " + player.getName() + "!");
+    player.jump();
+}
 ```
 
 Run it in-game:
@@ -88,15 +91,15 @@ Run it in-game:
 ScriptBridge offers a two-layered API.
 
 1.  **Helper API**: Quick and easy.
-    *   `game.chat(msg)`
-    *   `game.broadcast(msg)`
-    *   `game.spawnBlock(x,y,z,id)`
+    *   `game.getPlayer()` -> Returns `ScriptPlayer` wrapper.
+    *   `game.getWorld()` -> Returns `ScriptWorld` wrapper.
+    *   `game.setClipboard(text)`
     *   ...and more.
 
-2.  **Native API**: Full Java access.
+2.  **Native API**: Full Java access with auto-remapping.
     ```javascript
+    // Works everywhere!
     const MinecraftClient = Java.type('net.minecraft.client.MinecraftClient');
-    const client = MinecraftClient.getInstance();
     ```
 
 👉 **[Read the Full API Documentation](API.md)**

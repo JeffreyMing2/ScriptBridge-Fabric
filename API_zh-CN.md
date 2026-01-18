@@ -1,14 +1,13 @@
 # ScriptBridge-Fabric API 文档
 
-ScriptBridge-Fabric 提供了两层 API：
-1. **辅助 API** (`game` 对象)：用于简化常见操作。
-2. **原生 Java API** (GraalVM)：用于完全访问 Minecraft 内部机制。
+ScriptBridge-Fabric 为 Minecraft 提供了一个强大的 JavaScript 环境。
+它暴露了一个全局 `game` 对象以便于交互，并支持带有自动映射解析功能的 **原生 Java 访问**。
 
 ---
 
 ## 1. 辅助 API (`game` 对象)
 
-`game` 对象为常见任务提供了一个简化的接口。
+`game` 对象是你的主要入口点。它的方法在客户端和服务端之间略有不同。
 
 ### 全局方法
 *在客户端和服务端均可用。*
@@ -20,90 +19,97 @@ ScriptBridge-Fabric 提供了两层 API：
 
 ---
 
-### 服务端辅助 API
-*仅在 `scripts/server/` 中可用。*
+### 客户端辅助 API (`scripts/client/`)
 
-#### `game.log(String message)`
-记录到服务端控制台（如果开启调试模式也会发送到聊天栏）。
+#### 包装类 (Wrappers)
+客户端 API 提供了围绕 Minecraft 内部对象的安全包装类，使脚本编写更容易、更稳定。
 
-#### `game.broadcast(String message)`
-向所有玩家广播消息。
+#### `game.getPlayer()` -> `ScriptPlayer`
+返回本地玩家的包装对象。
+*   **`player.getName()`**: 获取玩家名称。
+*   **`player.getHealth()` / `player.getMaxHealth()`**: 获取生命值信息。
+*   **`player.getFoodLevel()`**: 获取饥饿值。
+*   **`player.getPos()`**: 返回 `{x, y, z}` 坐标映射。
+*   **`player.getX()`, `player.getY()`, `player.getZ()`**: 获取坐标。
+*   **`player.getYaw()`, `player.getPitch()`**: 获取朝向。
+*   **`player.isOnGround()`**: 检查是否在地面上。
+*   **`player.chat(message)`**: 发送聊天消息。
+*   **`player.jump()`**: 使玩家跳跃。
+*   **`player.getInventory()`**: 返回 `ScriptInventory` 对象。
+*   **`player.getMainHandItem()`**: 返回主手 `ScriptItem`。
+*   **`player.getOffHandItem()`**: 返回副手 `ScriptItem`。
 
-#### `game.modifyPlayer(String playerName, String attribute, double value)`
-修改玩家属性。
-- **attribute**: `"health"` (生命值), `"food"` (饱食度)。
+#### `game.getWorld()` -> `ScriptWorld`
+返回客户端世界的包装对象。
+*   **`world.getTime()`**: 获取世界总时间。
+*   **`world.getTimeOfDay()`**: 获取当前时间 (0-24000)。
+*   **`world.isRaining()`**: 检查是否下雨。
+*   **`world.isThundering()`**: 检查是否打雷。
+*   **`world.getDimension()`**: 获取维度 ID (如 `minecraft:overworld`)。
+*   **`world.getBlock(x, y, z)`**: 返回 `ScriptBlock` 对象。
 
-#### `game.spawnBlock(int x, int y, int z, String blockId)`
-在主世界生成方块。
+#### `ScriptBlock`
+*   **`block.getId()`**: 获取方块 ID (如 `minecraft:stone`)。
+*   **`block.getName()`**: 获取本地化名称。
+*   **`block.isSolid()`**: 检查是否为固体。
+*   **`block.isAir()`**: 检查是否为空气。
+*   **`block.getX()`, `block.getY()`, `block.getZ()`**: 获取坐标。
+
+#### `ScriptInventory`
+*   **`inv.getSize()`**: 获取总槽位数。
+*   **`inv.getStack(slot)`**: 获取指定槽位的 `ScriptItem`。
+*   **`inv.getAll()`**: 获取所有物品的列表。
+
+#### `ScriptItem`
+*   **`item.getId()`**: 获取物品 ID。
+*   **`item.getName()`**: 获取物品名称。
+*   **`item.getCount()`**: 获取堆叠数量。
+*   **`item.isEmpty()`**: 检查是否为空。
+*   **`item.getDamage()` / `item.getMaxDamage()`**: 获取耐久度信息。
+
+#### 其他客户端方法
+*   **`game.log(message)`**: 记录到客户端日志。
+*   **`game.chat(message)`**: 在本地聊天栏显示消息（仅自己可见）。
+*   **`game.sendChatMessage(message)`**: 向服务器发送聊天/命令。
+*   **`game.setClipboard(text)`**: 设置系统剪贴板内容。
+*   **`game.getClipboard()`**: 获取系统剪贴板内容。
 
 ---
 
-### 客户端辅助 API
-*仅在 `scripts/client/` 中可用。*
+### 服务端辅助 API (`scripts/server/`)
 
-#### `game.log(String message)`
-记录到客户端日志。
-
-#### `game.chat(String message)`
-在本地聊天栏显示消息（仅客户端可见）。
-
-#### `game.sendChatMessage(String message)`
-向服务器发送消息或命令。
-
-#### `game.getPlayerName()`
-获取当前玩家名称。
+*   **`game.log(message)`**: 记录到服务端控制台。
+*   **`game.broadcast(message)`**: 向所有玩家广播消息。
+*   **`game.modifyPlayer(name, attribute, value)`**: 修改玩家属性 (`health`, `food`)。
+*   **`game.spawnBlock(x, y, z, blockId)`**: 在主世界生成方块。
 
 ---
 
-## 2. 高级功能: 直接 Java 访问
+## 2. 原生 Java 访问 (智能且安全)
 
-ScriptBridge 使用 **GraalVM** 并开启了 `allowAllAccess(true)`，这意味着你可以使用 `Java.type()` 访问游戏或模组环境中的 **任何 Java 类**。
+ScriptBridge 使用 **GraalVM** 允许访问 Minecraft 内部类。
 
-### 用法
+### 自动重映射 (Automatic Remapping)
+你无需担心混淆名称！引擎会自动将标准类名解析为其运行时 Intermediary 名称。
+
 ```javascript
-const JavaString = Java.type('java.lang.String');
-const System = Java.type('java.lang.System');
+// 这在开发环境和生产环境都能正常工作！
+const MinecraftClient = Java.type('net.minecraft.client.MinecraftClient');
 ```
 
-### 客户端原生示例
-你可以直接访问 `MinecraftClient`。
+### 安全限制
+出于安全原因，对以下内容的访问已被 **阻止**：
+*   `java.lang.Runtime`
+*   `java.lang.Process`
+*   `java.lang.System` (部分)
+*   `java.io.*` (文件 I/O 受限)
 
+### 示例：客户端原生访问
 ```javascript
-// scripts/client/native_test.js
 const MinecraftClient = Java.type('net.minecraft.client.MinecraftClient');
-const Text = Java.type('net.minecraft.text.Text');
-
-// 获取客户端实例
 const client = MinecraftClient.getInstance();
 
-// 检查玩家是否存在
 if (client.player != null) {
-    // 发送原始数据包或修改客户端状态
-    client.player.sendMessage(Text.of("§a来自原生 Java API 的问候！"), false);
-    
-    // 示例: 设置 FOV (如果可访问) 或其他选项
-    // client.options.fov.setValue(110.0); 
+    client.player.jump();
 }
 ```
-
-### 服务端原生示例
-你可以访问 `MinecraftServer` 和内部逻辑。
-
-```javascript
-// scripts/server/native_test.js
-const Items = Java.type('net.minecraft.item.Items');
-const ItemStack = Java.type('net.minecraft.item.ItemStack');
-
-// 注意: 访问服务器实例通常需要从上下文或静态辅助类中获取
-// 因为 'game' 对象实现持有服务器实例，你可能需要反射或静态 getter。
-// 不过，许多 Fabric 类都有静态注册表。
-
-// 示例: 打印注册表条目名称
-const stone = Items.STONE;
-game.log("原生物品名称: " + stone.toString());
-```
-
-### 重要提示
-- **映射 (Mappings)**: 你必须使用正确的类名（取决于运行时环境是 Intermediary 还是 Yarn）。在生产环境的 Fabric 环境中（已重映射），如果不是在带有 Yarn 映射的开发环境中运行，你可能需要使用 Intermediary 名称，或者依赖模组加载器的重映射处理。*对于大多数最终用户，此功能是实验性的，并且依赖于运行时映射。*
-- **反射**: 如果需要，你可以使用 Java 反射。
-- **权限**: 这允许你做模组能做的任何事情。请谨慎使用。

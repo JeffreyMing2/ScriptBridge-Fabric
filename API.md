@@ -2,15 +2,14 @@
 
 [中文文档](API_zh-CN.md)
 
-ScriptBridge-Fabric provides two layers of API:
-1. The **Helper API** (`game` object) for simplified interaction.
-2. The **Native Java API** (GraalVM) for full access to Minecraft internals.
+ScriptBridge-Fabric provides a powerful JavaScript environment for Minecraft.
+It exposes a global `game` object for easy interaction and supports **Native Java Access** with automatic mapping resolution.
 
 ---
 
 ## 1. Helper API (`game` Object)
 
-The `game` object provides a simplified interface for common tasks.
+The `game` object is your main entry point. Its methods vary slightly between Client and Server.
 
 ### Global Methods
 *Available in both Client and Server.*
@@ -22,90 +21,97 @@ Enables or disables debug mode.
 
 ---
 
-### Server Helper API
-*Available in `scripts/server/`.*
+### Client Helper API (`scripts/client/`)
 
-#### `game.log(String message)`
-Logs to server console (and chat if debug is on).
+#### Wrappers
+The client API provides safe wrappers around Minecraft internal objects to make scripting easier and more stable.
 
-#### `game.broadcast(String message)`
-Broadcasts to all players.
+#### `game.getPlayer()` -> `ScriptPlayer`
+Returns a wrapper for the local player.
+*   **`player.getName()`**: Get player name.
+*   **`player.getHealth()` / `player.getMaxHealth()`**: Get health info.
+*   **`player.getFoodLevel()`**: Get hunger level.
+*   **`player.getPos()`**: Returns `{x, y, z}` map.
+*   **`player.getX()`, `player.getY()`, `player.getZ()`**: Get coordinates.
+*   **`player.getYaw()`, `player.getPitch()`**: Get rotation.
+*   **`player.isOnGround()`**: Check if on ground.
+*   **`player.chat(message)`**: Send a chat message.
+*   **`player.jump()`**: Make the player jump.
+*   **`player.getInventory()`**: Returns `ScriptInventory`.
+*   **`player.getMainHandItem()`**: Returns `ScriptItem` in main hand.
+*   **`player.getOffHandItem()`**: Returns `ScriptItem` in off hand.
 
-#### `game.modifyPlayer(String playerName, String attribute, double value)`
-Modifies player stats.
-- **attribute**: `"health"`, `"food"`.
+#### `game.getWorld()` -> `ScriptWorld`
+Returns a wrapper for the client world.
+*   **`world.getTime()`**: Get total world time.
+*   **`world.getTimeOfDay()`**: Get current day time (0-24000).
+*   **`world.isRaining()`**: Check if raining.
+*   **`world.isThundering()`**: Check if thundering.
+*   **`world.getDimension()`**: Get dimension ID (e.g., `minecraft:overworld`).
+*   **`world.getBlock(x, y, z)`**: Returns `ScriptBlock`.
 
-#### `game.spawnBlock(int x, int y, int z, String blockId)`
-Sets a block in the Overworld.
+#### `ScriptBlock`
+*   **`block.getId()`**: Get block ID (e.g., `minecraft:stone`).
+*   **`block.getName()`**: Get localized name.
+*   **`block.isSolid()`**: Check if solid.
+*   **`block.isAir()`**: Check if air.
+*   **`block.getX()`, `block.getY()`, `block.getZ()`**: Get coordinates.
+
+#### `ScriptInventory`
+*   **`inv.getSize()`**: Get total slots.
+*   **`inv.getStack(slot)`**: Get `ScriptItem` in slot.
+*   **`inv.getAll()`**: Get all items as a list.
+
+#### `ScriptItem`
+*   **`item.getId()`**: Get item ID.
+*   **`item.getName()`**: Get item name.
+*   **`item.getCount()`**: Get stack size.
+*   **`item.isEmpty()`**: Check if empty.
+*   **`item.getDamage()` / `item.getMaxDamage()`**: Get durability info.
+
+#### Other Client Methods
+*   **`game.log(message)`**: Log to client output.
+*   **`game.chat(message)`**: Show message in local chat (client-only).
+*   **`game.sendChatMessage(message)`**: Send chat/command to server.
+*   **`game.setClipboard(text)`**: Set system clipboard content.
+*   **`game.getClipboard()`**: Get text from system clipboard.
 
 ---
 
-### Client Helper API
-*Available in `scripts/client/`.*
+### Server Helper API (`scripts/server/`)
 
-#### `game.log(String message)`
-Logs to client output.
-
-#### `game.chat(String message)`
-Shows a message in local chat (client-only).
-
-#### `game.sendChatMessage(String message)`
-Sends a message or command to the server.
-
-#### `game.getPlayerName()`
-Returns the current player's name.
+*   **`game.log(message)`**: Log to server console.
+*   **`game.broadcast(message)`**: Broadcast to all players.
+*   **`game.modifyPlayer(name, attribute, value)`**: Modify player stats (`health`, `food`).
+*   **`game.spawnBlock(x, y, z, blockId)`**: Set block in Overworld.
 
 ---
 
-## 2. Advanced: Native Java Access
+## 2. Native Java Access (Smart & Safe)
 
-ScriptBridge uses **GraalVM** with `allowAllAccess(true)`, meaning you can access **any Java class** in the game or mod environment using `Java.type()`.
+ScriptBridge uses **GraalVM** to allow access to Minecraft internal classes.
 
-### Usage
+### Automatic Remapping
+You don't need to worry about obfuscated names! The engine automatically resolves standard class names to their runtime intermediary names.
+
 ```javascript
-const JavaString = Java.type('java.lang.String');
-const System = Java.type('java.lang.System');
+// This works in both Dev and Production environments!
+const MinecraftClient = Java.type('net.minecraft.client.MinecraftClient');
 ```
 
-### Client-Side Native Examples
-You can access `MinecraftClient` directly.
+### Security Restrictions
+For security reasons, access to the following is **BLOCKED**:
+*   `java.lang.Runtime`
+*   `java.lang.Process`
+*   `java.lang.System` (partial)
+*   `java.io.*` (File I/O is restricted)
 
+### Example: Client Native Access
 ```javascript
-// scripts/client/native_test.js
 const MinecraftClient = Java.type('net.minecraft.client.MinecraftClient');
-const Text = Java.type('net.minecraft.text.Text');
-
-// Get the client instance
 const client = MinecraftClient.getInstance();
 
-// Check if player exists
 if (client.player != null) {
-    // Send a raw packet or modify client state
-    client.player.sendMessage(Text.of("§aHello from Native Java API!"), false);
-    
-    // Example: Set FOV (if accessible) or other options
-    // client.options.fov.setValue(110.0); 
+    client.player.jump();
 }
 ```
-
-### Server-Side Native Examples
-You can access `MinecraftServer` and internal logic.
-
-```javascript
-// scripts/server/native_test.js
-const Items = Java.type('net.minecraft.item.Items');
-const ItemStack = Java.type('net.minecraft.item.ItemStack');
-
-// Note: Accessing server instance usually requires getting it from a context or static helper
-// Since 'game' object implementation holds the server, you might need reflection or static getters if available.
-// However, many Fabric classes have static registries.
-
-// Example: Print a registry entry name
-const stone = Items.STONE;
-game.log("Native Item Name: " + stone.toString());
-```
-
-### Important Notes
-- **Mappings**: You must use the correct class names (Intermediary or Yarn, depending on the runtime environment). In a production Fabric environment (Remapped), you might need to use Intermediary names if not running in a dev environment with Yarn mappings, OR the mod loader handles remapping. *For most end-users, this feature is experimental and depends on the runtime mappings.*
-- **Reflection**: You can use Java reflection if needed.
-- **Power**: This allows you to do ANYTHING a mod can do. Use with caution.

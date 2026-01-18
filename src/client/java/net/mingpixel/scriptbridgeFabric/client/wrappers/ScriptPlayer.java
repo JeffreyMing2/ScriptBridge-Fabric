@@ -1,6 +1,7 @@
 package net.mingpixel.scriptbridgeFabric.client.wrappers;
 
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.item.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +14,19 @@ public class ScriptPlayer {
 
     public boolean exists() {
         return player != null;
+    }
+
+    public ScriptInventory getInventory() {
+        if (player == null) return null;
+        return new ScriptInventory(player.getInventory());
+    }
+
+    public ScriptItem getMainHandItem() {
+        return player == null ? new ScriptItem(ItemStack.EMPTY) : new ScriptItem(player.getMainHandStack());
+    }
+
+    public ScriptItem getOffHandItem() {
+        return player == null ? new ScriptItem(ItemStack.EMPTY) : new ScriptItem(player.getOffHandStack());
     }
 
     public double getX() { return player == null ? 0 : player.getX(); }

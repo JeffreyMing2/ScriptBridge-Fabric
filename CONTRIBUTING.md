@@ -1,42 +1,61 @@
 # Contributing to ScriptBridge-Fabric
 
-Thank you for your interest in contributing to ScriptBridge-Fabric! We welcome contributions from everyone.
+First off, thank you for considering contributing to ScriptBridge-Fabric! We welcome contributions from everyone.
 
-## How to Contribute
+## 🛠 Development Setup
 
-### Reporting Bugs
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/MingPixel/ScriptBridge-Fabric.git
+    cd ScriptBridge-Fabric
+    ```
 
-If you find a bug, please create a new issue in our issue tracker. Be sure to include:
-- A clear title and description.
-- Steps to reproduce the bug.
-- The version of the mod, Fabric Loader, and Minecraft you are using.
-- Any relevant logs or screenshots.
+2.  **Setup the environment**:
+    *   This project uses Gradle. You don't need to install it manually; use the `gradlew` wrapper.
+    *   Run the setup command to generate IDE configuration files (for IntelliJ IDEA, Eclipse, or VS Code):
+    ```bash
+    ./gradlew genSources
+    ```
+    *   **VS Code Users**: Install the "Extension Pack for Java" and open the project root. It should auto-detect the Gradle project.
 
-### Suggesting Enhancements
+3.  **Build the project**:
+    ```bash
+    ./gradlew build
+    ```
 
-We love to hear your ideas! Please create an issue to suggest new features or improvements.
+## 📝 Code Style
 
-### Pull Requests
+### Java
+*   We follow the standard Java naming conventions.
+*   Use 4 spaces for indentation.
+*   Please keep the code clean and readable.
 
-1. Fork the repository.
-2. Create a new branch for your feature or fix: `git checkout -b my-feature-branch`
-3. Make your changes and commit them: `git commit -m "Add some feature"`
-4. Push to the branch: `git push origin my-feature-branch`
-5. Submit a pull request.
+### JavaScript (Scripts)
+*   We use ES6+ syntax supported by GraalVM.
+*   If you are contributing example scripts, please ensure they are well-commented.
 
-Please ensure your code follows the existing style and conventions.
+## 🤝 How to Contribute
 
-## Development Setup
+1.  **Fork** the repository on GitHub.
+2.  **Clone** your fork locally.
+3.  **Create a new branch** for your feature or bugfix (`git checkout -b feature/amazing-feature`).
+4.  **Commit** your changes (`git commit -m 'Add some amazing feature'`).
+5.  **Push** to the branch (`git push origin feature/amazing-feature`).
+6.  **Open a Pull Request**.
 
-1. Clone the repository.
-2. Run `./gradlew genSources` to generate Minecraft sources.
-3. Import the project into your IDE (IntelliJ IDEA is recommended).
+## 🐛 Bug Reporting
 
-## Community
+If you find a bug, please open an issue on GitHub. Include:
+*   Minecraft version
+*   Fabric Loader version
+*   ScriptBridge version
+*   A snippet of the script that causes the issue (if applicable)
+*   Logs or crash reports
 
-Join our official community for discussions and support:
-- **QQ Group**: 1080675954
+## 💡 Feature Requests
 
-## License
+We are open to new ideas! If you want a new feature (e.g., a new wrapper method), please open an issue to discuss it first.
+
+## 📜 License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
